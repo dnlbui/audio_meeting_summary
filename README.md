@@ -68,6 +68,19 @@ python transcribe.py "C:\Users\you\Documents\Personal_Project\audio_meeting_summ
 - **Model size:** The default Whisper model is `"base"`. For better accuracy (slower, more RAM), you can switch to `"small"` or `"medium"` in `transcribe.py`.
 - **Speaker labels:** Whisper does not identify speakers. To get “Speaker 1 / Speaker 2” style output, you’d need to add a separate diarization step (e.g. pyannote-audio).
 
+## Publish to GitHub
+
+1. Create a **new repository** on [GitHub](https://github.com/new) (e.g. `audio_meeting_summary`). Do not add a README or .gitignore—this repo already has them.
+2. In this folder, add the remote and push:
+
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/audio_meeting_summary.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+   Replace `YOUR_USERNAME` and `audio_meeting_summary` with your GitHub username and repo name. Use the SSH URL if you prefer: `git@github.com:YOUR_USERNAME/audio_meeting_summary.git`.
+
 ## License
 
 Use and modify as you like.
