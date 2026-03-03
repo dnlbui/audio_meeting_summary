@@ -102,7 +102,7 @@ python transcribe.py "C:\Users\you\Documents\Personal_Project\audio_meeting_summ
 
 ## Notes
 
-- **Transcription device:** The script uses `device="cpu"` by default. If you have an NVIDIA GPU and CUDA set up, you can change to `device="cuda"` in `transcribe.py` for faster runs.
+- **Transcription device:** The script uses `device="cpu"` by default. If you have an NVIDIA GPU, install the [CUDA Toolkit 12](https://developer.nvidia.com/cuda-downloads) (so `cublas64_12.dll` and related libraries are available), then change to `device="cuda"` in `transcribe.py` for faster runs.
 - **Model size:** The default Whisper model is `"base"`. For better accuracy (slower, more RAM), you can switch to `"small"` or `"medium"` in `transcribe.py`.
 - **Speaker labels:** Whisper does not identify speakers. To get “Speaker 1 / Speaker 2” style output, you’d need to add a separate diarization step (e.g. pyannote-audio).
 

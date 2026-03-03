@@ -22,13 +22,19 @@ base_name = os.path.splitext(os.path.basename(audio_path))[0]
 output_path = base_name + ".txt"
 
 print(f"Loading Whisper model (first run downloads ~150MB)...")
-model = WhisperModel("base", device="cpu")  # CPU mode; use "cuda" if you have NVIDIA GPU
+model = WhisperModel("base", device="cpu")  # Use "cuda" when CUDA 12 is installed (see README)
 
 print(f"Transcribing: {audio_path}")
+print("(On CPU this can take a while for long files; you'll see progress below.)")
 segments, info = model.transcribe(audio_path)
 
 with open(output_path, "w", encoding="utf-8") as f:
-    for segment in segments:
+    for i, segment in enumerate(segments):
         f.write(segment.text)
+        # Progress: show every 10th segment or first few so it's clear something is happening
+        if i < 3 or (i + 1) % 10 == 0 or segment.end and segment.end > 0:
+            mins = int(segment.end // 60) if segment.end else 0
+            secs = int(segment.end % 60) if segment.end else 0
+            print(f"  ... segment {i + 1} (up to ~{mins}:{secs:02d})")
 
 print(f"Done. Transcript saved to: {os.path.abspath(output_path)}")
