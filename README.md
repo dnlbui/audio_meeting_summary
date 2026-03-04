@@ -5,7 +5,7 @@ Extract audio from video (e.g. OBS recordings) and transcribe it to text using f
 ## What’s in this repo
 
 - **`record_audio.py`** – Records from your microphone to a WAV file. **Cross-platform:** same script on Windows, Linux, and macOS (uses [sounddevice](https://python-sounddevice.readthedocs.io/) / PortAudio).
-- **`extract_audio.py`** – Pulls audio from an MP4 (or other video) and saves it as MP3. Uses ffmpeg via `imageio_ffmpeg`.
+- **`extract_audio.py`** – Pulls audio from an MP4, MKV, or other video and saves it as MP3. Uses ffmpeg via `imageio_ffmpeg`.
 - **`transcribe.py`** – Transcribes an audio file to a `.txt` transcript. Uses [faster-whisper](https://github.com/SYSTRAN/faster-whisper) (Whisper running locally on CPU or GPU).
 
 ## Install
@@ -13,9 +13,33 @@ Extract audio from video (e.g. OBS recordings) and transcribe it to text using f
 ### 1. Python
 
 - Use **Python 3.10+**.
-- Ensure `python` and `pip` are on your PATH.
+- Ensure `python` (Windows) or `python3` (Linux/macOS) and `pip` are on your PATH.
 
-### 2. Dependencies
+### 2. Virtual environment (recommended on Linux / macOS)
+
+On Linux and macOS, the system Python is often **externally managed** (PEP 668), so `pip install` system-wide will fail. Create a virtual environment in the project directory:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
+
+On Windows (optional, but keeps things isolated):
+
+```powershell
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+```
+
+Then run scripts with the venv Python:
+- **Linux/macOS:** `.venv/bin/python script.py ...`
+- **Windows:** `.venv\Scripts\python.exe script.py ...`
+
+Or activate the venv first (`source .venv/bin/activate` on Linux/macOS, `.venv\Scripts\activate` on Windows), then use `python` as usual.
+
+### 3. Dependencies (without venv, if your system allows)
+
+If you're on Windows and prefer not to use a venv:
 
 ```bash
 pip install -r requirements.txt
@@ -29,12 +53,13 @@ pip install -r requirements.txt
   python -m pip install --upgrade pip pip-audit
   python -m pip_audit -r requirements.txt
   ```
+  (Use `.venv/bin/python -m pip` on Linux/macOS if using the venv.)
 
 - **`sounddevice`** + **`soundfile`** – Used by `record_audio.py`. `sounddevice` uses PortAudio to capture from the microphone (same API on Windows, Linux, macOS). `soundfile` writes the recorded samples to WAV. No extra system install needed beyond pip.
 - **`imageio-ffmpeg`** – Used by `extract_audio.py`. It ships a bundled ffmpeg binary so you don’t install ffmpeg yourself. It’s only used to extract audio from video.
 - **`faster-whisper`** – Used by `transcribe.py`. It pulls in the Whisper model runtime (CTranslate2, ONNX, etc.) and Hugging Face Hub to download the model. The first time you run transcription, it will download the Whisper model (see below).
 
-### 3. What gets downloaded (high level)
+### 4. What gets downloaded (high level)
 
 | When | What | Where it goes | What it’s for |
 |------|------|----------------|---------------|
@@ -50,10 +75,20 @@ So: **two kinds of downloads** — (1) **pip packages** (code + ffmpeg binary + 
 
 Pass the **full path** to the file (or, for recording, the desired output path). No default paths.
 
+Use `python` or `python3` depending on your system. If you created a venv, use `.venv/bin/python` (Linux/macOS) or `.venv\Scripts\python.exe` (Windows) instead.
+
 ### Record from the microphone
 
+**Linux/macOS:**
 ```bash
-python record_audio.py "C:\path\to\output.wav"
+.venv/bin/python record_audio.py "/home/you/recordings/output.wav"
+# or: python3 record_audio.py "/home/you/recordings/output.wav"
+```
+
+**Windows:**
+```powershell
+.venv\Scripts\python.exe record_audio.py "C:\path\to\output.wav"
+# or: python record_audio.py "C:\path\to\output.wav"
 ```
 
 - Records from the **default input device** until you press **Ctrl+C**. Output is WAV (e.g. for use with `transcribe.py`; you can transcribe WAV directly).
@@ -61,48 +96,68 @@ python record_audio.py "C:\path\to\output.wav"
 To record for a fixed length (e.g. 60 seconds):
 
 ```bash
-python record_audio.py "C:\path\to\output.wav" 60
+.venv/bin/python record_audio.py "output.wav" 60
 ```
 
 - Same script works on **Windows, Linux, and macOS**; PortAudio picks the right microphone API per OS.
 
 ### Extract audio from a video
 
+**Linux/macOS:**
 ```bash
-python extract_audio.py "C:\path\to\your\recording.mp4"
+.venv/bin/python extract_audio.py "/path/to/recording.mp4"
+# Supports MP4, MKV, and other formats ffmpeg handles
 ```
 
-- Output: same directory as the script, same base name as the video, with `.mp3` (e.g. `recording.mp3`).
+**Windows:**
+```powershell
+.venv\Scripts\python.exe extract_audio.py "C:\path\to\recording.mp4"
+```
+
+- Output: same directory as the script (current directory), same base name as the video, with `.mp3` (e.g. `recording.mp3`).
 
 ### Transcribe audio to text
 
+**Linux/macOS:**
 ```bash
-python transcribe.py "C:\path\to\your\audio.mp3"
+.venv/bin/python transcribe.py "/path/to/audio.mp3"
+```
+
+**Windows:**
+```powershell
+.venv\Scripts\python.exe transcribe.py "C:\path\to\audio.mp3"
 ```
 
 - Output: same directory as the script, same base name as the audio, with `.txt` (e.g. `audio.txt`).
-- First run will download the Whisper model; later runs use the cache.
+- First run will download the Whisper model (~150 MB); later runs use the cache.
 
 ### Example workflow
 
-**From a video file:**
+**From a video file (Linux):**
 
 ```bash
-python extract_audio.py "C:\Users\you\Videos\meeting.mp4"
-python transcribe.py "C:\Users\you\Documents\Personal_Project\audio_meeting_summary\meeting.mp3"
+.venv/bin/python extract_audio.py "/home/you/Videos/meeting.mkv"
+.venv/bin/python transcribe.py "/home/you/audio_meeting_summary/meeting.mp3"
+```
+
+**From a video file (Windows):**
+
+```powershell
+.venv\Scripts\python.exe extract_audio.py "C:\Users\you\Videos\meeting.mp4"
+.venv\Scripts\python.exe transcribe.py "C:\Users\you\Projects\audio_meeting_summary\meeting.mp3"
 ```
 
 **From a live recording:**
 
 ```bash
-python record_audio.py "C:\Users\you\Documents\Personal_Project\audio_meeting_summary\meeting.wav"
+.venv/bin/python record_audio.py "meeting.wav"
 # ... speak, then press Ctrl+C ...
-python transcribe.py "C:\Users\you\Documents\Personal_Project\audio_meeting_summary\meeting.wav"
+.venv/bin/python transcribe.py "meeting.wav"
 ```
 
 ## Notes
 
-- **Transcription device:** The script uses `device="cpu"` by default. If you have an NVIDIA GPU, install the [CUDA Toolkit 12](https://developer.nvidia.com/cuda-downloads) (so `cublas64_12.dll` and related libraries are available), then change to `device="cuda"` in `transcribe.py` for faster runs.
+- **Transcription device:** The script uses `device="cpu"` by default. If you have an NVIDIA GPU, install the [CUDA Toolkit 12](https://developer.nvidia.com/cuda-downloads) (so CUDA libraries such as `cublas64_12.dll` on Windows or `libcublas.so` on Linux are available), then change to `device="cuda"` in `transcribe.py` for faster runs.
 - **Model size:** The default Whisper model is `"base"`. For better accuracy (slower, more RAM), you can switch to `"small"` or `"medium"` in `transcribe.py`.
 - **Speaker labels:** Whisper does not identify speakers. To get “Speaker 1 / Speaker 2” style output, you’d need to add a separate diarization step (e.g. pyannote-audio).
 
