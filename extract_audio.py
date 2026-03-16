@@ -1,18 +1,41 @@
 import os
 import sys
 import subprocess
+import argparse
 import imageio_ffmpeg
 
-# Require video file path as argument
-if len(sys.argv) < 2:
-    print("Usage: python extract_audio.py <video_file>")
-    sys.exit(1)
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Extract audio from a video file (MP4/MKV/etc) to an MP3."
+    )
+    parser.add_argument("video_file", help="Path to the input video file")
+    parser.add_argument(
+        "--out-dir",
+        default="outputs",
+        help='Base output directory (default: "outputs")',
+    )
+    parser.add_argument(
+        "--bitrate",
+        default="192k",
+        help='MP3 audio bitrate (default: "192k")',
+    )
+    parser.add_argument(
+        "--sample-rate",
+        default=44100,
+        type=int,
+        help="Audio sample rate in Hz (default: 44100)",
+    )
+    return parser.parse_args()
 
-video_path = sys.argv[1]
 
-# Output audio: same base name as video, .mp3, in current directory
+args = parse_args()
+video_path = args.video_file
+
+# Output audio: outputs/audio/<base>.mp3 by default
 base_name = os.path.splitext(os.path.basename(video_path))[0]
-output_path = base_name + ".mp3"
+audio_dir = os.path.join(args.out_dir, "audio")
+os.makedirs(audio_dir, exist_ok=True)
+output_path = os.path.join(audio_dir, base_name + ".mp3")
 
 # Check if video file exists
 if not os.path.exists(video_path):
@@ -32,8 +55,8 @@ try:
         "-i", video_path,
         "-vn",  # No video
         "-acodec", "libmp3lame",  # MP3 codec
-        "-ab", "192k",  # Audio bitrate
-        "-ar", "44100",  # Sample rate
+        "-ab", args.bitrate,  # Audio bitrate
+        "-ar", str(args.sample_rate),  # Sample rate
         "-y",  # Overwrite output file if it exists
         output_path
     ]

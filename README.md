@@ -115,6 +115,7 @@ To record for a fixed length (e.g. 60 seconds):
 ```
 
 - Output: same directory as the script (current directory), same base name as the video, with `.mp3` (e.g. `recording.mp3`).
+- Default output: `outputs/audio/<video_basename>.mp3` (use `--out-dir` to change).
 
 ### Transcribe audio to text
 
@@ -128,7 +129,7 @@ To record for a fixed length (e.g. 60 seconds):
 .venv\Scripts\python.exe transcribe.py "C:\path\to\audio.mp3"
 ```
 
-- Output: same directory as the script, same base name as the audio, with `.txt` (e.g. `audio.txt`).
+- Default output: `outputs/transcripts/<audio_basename>.txt` (use `--out-dir` to change).
 - First run will download the Whisper model (~150 MB); later runs use the cache.
 
 ### Example workflow
@@ -137,7 +138,7 @@ To record for a fixed length (e.g. 60 seconds):
 
 ```bash
 .venv/bin/python extract_audio.py "/home/you/Videos/meeting.mkv"
-.venv/bin/python transcribe.py "/home/you/audio_meeting_summary/meeting.mp3"
+.venv/bin/python transcribe.py "outputs/audio/meeting.mp3"
 ```
 
 **From a video file (Windows):**
